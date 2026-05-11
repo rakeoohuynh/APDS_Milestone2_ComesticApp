@@ -8,70 +8,105 @@
 </head>
 <body>
 
-    <header class="hero">
-        <div class="hero-inner">
-            <h1 class="logo">Beauty<span>Shop</span></h1>
-            <p class="tagline">Discover premium cosmetics from top brands</p>
-            <form class="search-form" action="/" method="GET">
-                <input
-                    type="text"
-                    name="search_box"
-                    placeholder="Search products or brands..."
-                    value="{{ last_search }}"
-                    autocomplete="off"
-                >
-                <button type="submit">Search</button>
-            </form>
-        </div>
-    </header>
+<!-- ── Header ───────────────────────────────────────── -->
+<header class="hero">
+    <div class="hero-inner">
+        <a href="/" class="logo">Beauty<span>Shop</span></a>
+        <p class="tagline">Discover premium cosmetics from top brands</p>
+        <form class="search-form" action="/" method="GET">
+            <input
+                type="text"
+                name="search_box"
+                placeholder="Search by brand or product name..."
+                value="{{ last_search }}"
+                autocomplete="off"
+            >
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</header>
 
-    <main class="main-content">
-        <div class="results-bar">
-            {% if last_search %}
-                <span>Results for "<strong>{{ last_search }}</strong>" &mdash; {{ products|length }} product(s) found</span>
-                <a href="/" class="clear-link">Clear search</a>
-            {% else %}
-                <span>All Products &mdash; <strong>{{ products|length }}</strong> items</span>
-            {% endif %}
-        </div>
+<!-- ── Main ─────────────────────────────────────────── -->
+<main class="main-content">
 
-        {% if products %}
-            <div class="product-grid">
-                {% for item in products %}
-                <a class="product-card" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">
-                    <div class="card-badge">{{ item.brand }}</div>
-                    <div class="card-body">
-                        <h3 class="card-title">{{ item.name }}</h3>
-                        <div class="card-meta">
-                            <div class="rating">
-                                <span class="stars">
-                                    {% set full = item.rating | int %}
-                                    {% for i in range(5) %}
-                                        {% if i < full %}&#9733;{% else %}&#9734;{% endif %}
-                                    {% endfor %}
-                                </span>
-                                <span class="rating-val">{{ item.rating }} ({{ item.rating_count }})</span>
-                            </div>
-                            <div class="price">&#8377;{{ item.price }}</div>
-                        </div>
-                        {% if item.tags %}
-                            <span class="tag">{{ item.tags }}</span>
-                        {% endif %}
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
+    <!-- Results bar -->
+    <div class="results-bar">
+        {% if last_search %}
+            <span class="results-msg">
+                Found <strong>{{ total }}</strong> product{{ 's' if total != 1 }} matching
+                "<em>{{ last_search }}</em>"
+            </span>
+            <a href="/" class="btn-back">&#8592; Back to Home</a>
         {% else %}
-            <div class="empty-state">
-                <p>No products found for "<strong>{{ last_search }}</strong>".</p>
-                <a href="/" class="clear-link">Browse all products</a>
-            </div>
+            <span class="results-msg">All Products &mdash; <strong>{{ total }}</strong> items</span>
+            <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
         {% endif %}
-    </main>
+    </div>
 
-    <footer class="footer">
-        <p>Beauty Shop &copy; 2025 &mdash; Powered by Nykaa data</p>
-    </footer>
+    <!-- Product grid -->
+    {% if products %}
+    <div class="product-grid">
+        {% for item in products %}
+        <a class="product-card" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">
+            <div class="card-img-wrap">
+                <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+                <span class="brand-badge">{{ item.brand }}</span>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ item.name }}</h3>
+                <p class="card-desc">{{ item.description }}</p>
+                <div class="card-footer">
+                    <div class="rating">
+                        {% set full = item.rating | int %}
+                        {% for i in range(5) %}
+                            <span class="{{ 'star-full' if i < full else 'star-empty' }}">&#9733;</span>
+                        {% endfor %}
+                        <span class="rating-count">({{ item.rating_count }})</span>
+                    </div>
+                    <span class="price">&#8377;{{ item.price }}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav class="pagination">
+        {% if page > 1 %}
+            <a href="/?page={{ page - 1 }}&search_box={{ last_search }}" class="page-btn">&laquo; Prev</a>
+        {% endif %}
+
+        {% set window = 2 %}
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == 1 or p == total_pages or (p >= page - window and p <= page + window) %}
+                {% if loop.changed(p > 1 and p < page - window) %}
+                    <span class="page-ellipsis">&hellip;</span>
+                {% endif %}
+                <a href="/?page={{ p }}&search_box={{ last_search }}"
+                   class="page-btn {{ 'active' if p == page }}">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page < total_pages %}
+            <a href="/?page={{ page + 1 }}&search_box={{ last_search }}" class="page-btn">Next &raquo;</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <p>No products found for "<strong>{{ last_search }}</strong>".</p>
+        <a href="/" class="btn-back">&#8592; Back to Home</a>
+    </div>
+    {% endif %}
+
+</main>
+
+<!-- ── Footer ───────────────────────────────────────── -->
+<footer class="footer">
+    <p>Beauty Shop &copy; 2025 &mdash; Powered by Nykaa data</p>
+</footer>
 
 </body>
 </html>
