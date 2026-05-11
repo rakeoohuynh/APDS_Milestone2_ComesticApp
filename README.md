@@ -3,9 +3,9 @@
 
 ### Group Information
 **Group Name:** UN_group1
-* **Student 1 Name:** [Huynh Nguyen Minh Nhu] | **Student ID:** [s4104540] [1]
-* **Student 2 Name:** [Robin Pinel] | **Student ID:** [s4216998] [1]
-* **Student 3 Name:** [Dilys Huynh] | **Student ID:** [s3938224] [1]
+* **Student 1 Name:** Huynh Nguyen Minh Nhu | **Student ID:** s4104540 [1]
+* **Student 2 Name:** Robin Pinel | **Student ID:** s4216998 [1]
+* **Student 3 Name:** Dilys Huynh | **Student ID:** s3938224 [1]
 
 
 ### Project Overview
