@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 
 _PRODUCTS = None
 
@@ -30,29 +31,57 @@ def _load_products():
                     rating_count = int(float(row['product_rating_count']))
                 except (ValueError, TypeError):
                     rating_count = 0
+
+                brand = row['brand_name'].strip()
+                tags = row.get('product_tags', '').strip()
+                description = tags if tags else f'Premium {brand} beauty product'
+
                 products.append({
                     'id': pid,
-                    'name': row['product_title'],
-                    'brand': row['brand_name'],
+                    'name': row['product_title'].strip(),
+                    'brand': brand,
+                    'description': description,
                     'price': price,
                     'rating': rating,
                     'rating_count': rating_count,
-                    'url': row['product_url'],
-                    'tags': row.get('product_tags', ''),
+                    'url': row['product_url'].strip(),
+                    'image': f'https://picsum.photos/seed/{pid}/300/200',
                 })
 
     _PRODUCTS = products
     return _PRODUCTS
 
 
-def get_filtered_products(query=None):
+def search_products(query=None):
+    """Return all products, or those matching query using case-insensitive regex."""
     products = _load_products()
 
-    if not query:
+    if not query or not query.strip():
         return products
 
-    query = query.lower()
+    try:
+        pattern = re.compile(re.escape(query.strip()), re.IGNORECASE)
+    except re.error:
+        return products
+
     return [
         p for p in products
-        if query in p['name'].lower() or query in p['brand'].lower()
+        if pattern.search(p['brand']) or pattern.search(p['name']) or pattern.search(p['description'])
     ]
+
+
+def get_paginated_products(query=None, page=1, per_page=12):
+    """Return a page slice plus metadata dict for the template."""
+    results = search_products(query)
+    total = len(results)
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    page = max(1, min(page, total_pages))
+
+    start = (page - 1) * per_page
+    return {
+        'products': results[start:start + per_page],
+        'total': total,
+        'page': page,
+        'total_pages': total_pages,
+        'per_page': per_page,
+    }
