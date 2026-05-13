@@ -502,6 +502,24 @@ body {
 
 .no-reviews { color: #aaa; font-size: 0.95rem; padding: 24px 0; }
 
+/* ── Recommendations ─────────────────────────────── */
+.reco-section {
+    border-top: 2px solid #f0e0e8;
+    padding-top: 32px;
+    margin-top: 40px;
+}
+.reco-section h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+}
+.reco-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
 /* ── Detail page responsive ─────────────────────── */
 @media (max-width: 700px) {
     .detail-section { grid-template-columns: 1fr; gap: 20px; }
