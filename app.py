@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from app.logic.products import get_paginated_products, get_product_by_id, clear_products_cache
 from app.logic.reviews import get_product_reviews, append_review
+from app.logic.recommend import recommend_products
 
 app = Flask(__name__)
 app.secret_key = 'beauty-shop-secret'
@@ -18,7 +19,19 @@ def product_detail(product_id):
     if not product:
         return redirect(url_for('index'))
     reviews = get_product_reviews(product_id)
-    return render_template('product.html', product=product, reviews=reviews)
+
+    recommendations = []
+    try:
+        recs = recommend_products(int(product_id), top_n=5)
+        if not isinstance(recs, str):  # returns "Product not found" string on failure
+            for pid in recs['product_id'].astype(str):
+                p = get_product_by_id(pid)
+                if p:
+                    recommendations.append(p)
+    except Exception:
+        pass
+
+    return render_template('product.html', product=product, reviews=reviews, recommendations=recommendations)
 
 @app.route('/product/<product_id>/review', methods=['POST'])
 def add_review(product_id):
