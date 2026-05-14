@@ -502,6 +502,129 @@ body {
 
 .no-reviews { color: #aaa; font-size: 0.95rem; padding: 24px 0; }
 
+/* ── Buy button ──────────────────────────────────── */
+.buy-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+.btn-buy {
+    display: inline-block;
+    padding: 12px 32px;
+    background: #8b3a62;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.btn-buy:hover { background: #5a1535; }
+
+.purchased-note {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2e7d32;
+    background: #e8f5e9;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+/* ── Checkout page ───────────────────────────────── */
+.checkout-wrap {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.checkout-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0e0e8;
+}
+
+.checkout-summary {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+.checkout-product {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+.checkout-img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #f0e6ef;
+    flex-shrink: 0;
+}
+.checkout-product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.checkout-brand {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8b3a62;
+}
+.checkout-product-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.4;
+}
+.checkout-unit-price {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.checkout-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #f0e0e8;
+}
+.checkout-total-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #444;
+}
+.checkout-total-price {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #8b3a62;
+}
+
+.checkout-form-wrap {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+.form-group--inline { max-width: 140px; }
+
+.btn-place-order { padding: 12px 36px; font-size: 1rem; }
+
+@media (max-width: 780px) {
+    .checkout-wrap { grid-template-columns: 1fr; gap: 20px; }
+}
+
 /* ── Recommendations ─────────────────────────────── */
 .reco-section {
     border-top: 2px solid #f0e0e8;
