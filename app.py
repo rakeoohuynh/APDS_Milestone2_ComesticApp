@@ -33,6 +33,16 @@ def product_detail(product_id):
 
     return render_template('product.html', product=product, reviews=reviews, recommendations=recommendations)
 
+# TODO: GET /product/<product_id>/checkout
+#   - fetch product by id, redirect to index if not found
+#   - render checkout.html with product
+
+# TODO: POST /product/<product_id>/checkout
+#   - validate form fields: full_name, email, address, quantity
+#   - if valid: add product_id to session['purchased'] list, set session.modified = True
+#   - flash 'Order placed! You can now leave a verified review.' success
+#   - redirect to product_detail
+
 @app.route('/product/<product_id>/review', methods=['POST'])
 def add_review(product_id):
     author = request.form.get('author', '').strip()
