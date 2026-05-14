@@ -691,6 +691,72 @@ body {
     gap: 16px;
 }
 
+/* --- AI Prediction Styling --- */
+#ai-prediction-wrap {
+    background-color: #fff5f8; /* Màu hồng nhạt ton-sur-ton với Beauty Shop */
+    border: 2px dashed #ffc1d6;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+#ai-prediction-wrap p {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: #444;
+}
+
+#ai-label-text {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.5);
+}
+
+/* Label cho Select Box */
+.ai-select-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-style: italic;
+}
+
+/* Tùy chỉnh Select Box */
+#final_label {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#final_label:focus {
+    border-color: #d63384;
+}
+
+/* Chú thích nhỏ */
+.ai-note {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 10px;
+    display: block;
+}
+
+/* Hiệu ứng khi đang load */
+.ai-thinking {
+    opacity: 0.6;
+    font-style: italic;
+}
+
 /* ── Detail page responsive ─────────────────────── */
 @media (max-width: 700px) {
     .detail-section { grid-template-columns: 1fr; gap: 20px; }

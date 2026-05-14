@@ -104,9 +104,9 @@
                 <div class="form-group">
                     <label>Rating</label>
                     <div class="star-picker">
-                        {% for val in [1,2,3,4,5] %}
-                        <input type="radio" id="star{{ val }}" name="rating" value="{{ val }}" required>
-                        <label for="star{{ val }}" title="{{ val }} star{{ 's' if val > 1 }}">&#9733;</label>
+                        {% for val in [5,4,3,2,1] %}
+                        <input type="radio" id="star-{{ product.id }}-{{ val }}" name="rating" value="{{ val }}" required>
+                        <label for="star-{{ product.id }}-{{ val }}" title="{{ val }} stars">&#9733;</label>
                         {% endfor %}
                     </div>
                 </div>
@@ -121,8 +121,23 @@
                     <textarea id="review_text" name="review_text" rows="4" placeholder="Tell us what you think..." required></textarea>
                 </div>
 
+                <div id="ai-prediction-wrap" style="display:none; margin: 15px 0; padding: 15px; background: #f0f8ff; border-radius: 8px; border: 2px solid #4a90e2;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold;">
+                        AI Suggestion: <span id="ai-label-text" style="color: #4a90e2;">Analyzing...</span>
+                    </p>
+                    <label class="ai-select-label" for="final_label" style="display: block; margin-bottom: 8px;">
+                        Is our prediction accurate? Feel free to adjust:
+                    </label>
+                    <select id="final_label" name="final_label" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                        <option value="">-- Select your preference --</option>
+                        <option value="1">Yes, I'd recommend this (Buy)</option>
+                        <option value="0">No, I wouldn't recommend this (Not Buy)</option>
+                    </select>
+                    <span class="ai-note" style="display: block; margin-top: 8px; font-size: 12px; color: #666;">* Your feedback helps improve our recommendation engine.</span>
+                </div>
+
                 <div class="form-actions">
-                    <button type="submit" class="btn-submit">Submit Review</button>
+                    <button type="submit" class="btn-submit" id="submitBtn">Submit Review</button>
                     <button type="button" class="btn-cancel" onclick="toggleReviewForm()">Cancel</button>
                 </div>
             </form>
@@ -249,19 +264,159 @@ function filterReviews(label) {
 }
 
 function toggleReviewForm() {
+
     const form = document.getElementById('reviewForm');
     const btn  = document.querySelector('.btn-add-review');
+
     if (form.style.display === 'none') {
+
         form.style.display = 'block';
+
         btn.textContent = '✕ Close';
-        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        form.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+
     } else {
+
         form.style.display = 'none';
+
         btn.textContent = '+ Add Review';
+
+        document.querySelector('.review-form').reset();
+
+        document.getElementById('ai-prediction-wrap').style.display = 'none';
+
+        document.getElementById('final_label').value = '';
+
+        aiPredictionDone = false;
+
+        document.getElementById('submitBtn').textContent =
+            'Submit Review';
     }
 }
 
-document.addEventListener('DOMContentLoaded', renderPage);
+let aiPredictionDone = false;
+
+document.addEventListener('DOMContentLoaded', function(){
+
+    const form = document.querySelector('.review-form');
+
+    if (!form) {
+        console.error('Review form not found');
+        return;
+    }
+
+    form.addEventListener('submit', async function(event) {
+
+        // FIRST SUBMIT → AI PREDICTION
+        if (!aiPredictionDone) {
+
+            event.preventDefault();
+
+            const reviewText =
+                document.getElementById('review_text').value.trim();
+
+            const selectedRating =
+                document.querySelector('input[name="rating"]:checked');
+
+            if (reviewText.length < 10 || !selectedRating) {
+
+                alert(
+                    'Please provide a rating and write at least 10 characters.'
+                );
+
+                return;
+            }
+
+            const rating = parseInt(selectedRating.value);
+
+            const aiWrap =
+                document.getElementById('ai-prediction-wrap');
+
+            const aiLabelText =
+                document.getElementById('ai-label-text');
+
+            const labelSelect =
+                document.getElementById('final_label');
+
+            const submitBtn =
+                document.getElementById('submitBtn');
+
+            aiWrap.style.display = 'block';
+
+            aiLabelText.textContent = 'Analyzing your review...';
+
+            aiLabelText.style.color = '#666';
+
+            submitBtn.disabled = true;
+
+            try {
+
+                const response = await fetch('/api/predict_label', {
+
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        text: reviewText,
+                        rating: rating
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.label === 'Buy') {
+
+                    aiLabelText.textContent =
+                        '✓ Positive - This looks like a Buyer Review';
+
+                    aiLabelText.style.color = '#27ae60';
+
+                    labelSelect.value = '1';
+
+                } else {
+
+                    aiLabelText.textContent =
+                        '✗ Negative - This looks like a Not Buy Review';
+
+                    aiLabelText.style.color = '#e74c3c';
+
+                    labelSelect.value = '0';
+                }
+
+                aiPredictionDone = true;
+
+                submitBtn.disabled = false;
+
+                submitBtn.textContent = 'Confirm Review';
+
+            } catch (error) {
+
+                aiLabelText.textContent =
+                    'Error analyzing review. Please try again.';
+
+                aiLabelText.style.color = '#e74c3c';
+
+                submitBtn.disabled = false;
+
+                console.error(error);
+            }
+
+            return;
+        }
+
+        // SECOND SUBMIT
+        // form submits normally
+
+    });
+});
+
 </script>
 
 </body>
