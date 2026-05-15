@@ -168,14 +168,14 @@ def predict(review_text, rating=3):
     # 3. Get Probability from Model 3 
     pred_rating = rating_model.predict_proba([[rating]])[0][1]
 
-    # Print debug to check which model predicted wrong
-    print(f"LR (Keyword): {pred_lr:.4f}")
-    print(f"RF (Semantic): {pred_rf:.4f}")
-    print(f"GNB (Rating): {pred_rating:.4f}")
+    # # Print debug to check which model predicted wrong
+    # print(f"LR (Keyword): {pred_lr:.4f}")
+    # print(f"RF (Semantic): {pred_rf:.4f}")
+    # print(f"GNB (Rating): {pred_rating:.4f}")
     
     # Calculate Final Score 
     final_score = (pred_lr * 0.45) + (pred_rf * 0.45) + (pred_rating * 0.1)
-    print(f"FINAL SCORE: {final_score:.4f}")
+    # print(f"FINAL SCORE: {final_score:.4f}")
 
     return 1 if final_score >= 0.7 else 0
     
