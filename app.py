@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from app.logic.products import get_paginated_products, get_product_by_id, clear_products_cache
 from app.logic.reviews import get_product_reviews, append_review
 from app.logic.recommend import recommend_products
@@ -54,15 +54,35 @@ def product_detail(product_id):
 
     return render_template('product.html', product=product, reviews=reviews, recommendations=recommendations)
 
-# TODO: GET /product/<product_id>/checkout
-#   - fetch product by id, redirect to index if not found
-#   - render checkout.html with product
+@app.route('/product/<product_id>/checkout', methods=['GET', 'POST'])
+def checkout(product_id):
+    product = get_product_by_id(product_id)
+    if not product:
+        return redirect(url_for('index'))
 
-# TODO: POST /product/<product_id>/checkout
-#   - validate form fields: full_name, email, address, quantity
-#   - if valid: add product_id to session['purchased'] list, set session.modified = True
-#   - flash 'Order placed! You can now leave a verified review.' success
-#   - redirect to product_detail
+    if request.method == 'POST':
+        full_name = request.form.get('full_name', '').strip()
+        email     = request.form.get('email', '').strip()
+        address   = request.form.get('address', '').strip()
+        quantity  = request.form.get('quantity', '').strip()
+
+        if not all([full_name, email, address, quantity]):
+            flash('Please fill in all fields.', 'error')
+            return render_template('checkout.html', product=product)
+
+        # Mark this product as purchased in the session so that any subsequent
+        # review from this browser session receives the "Verified Buyer" label.
+        purchased = session.get('purchased', [])
+        if product_id not in purchased:
+            purchased.append(product_id)
+        session['purchased'] = purchased
+        session.modified = True
+
+        flash('Order placed! You can now leave a verified review.', 'success')
+        return redirect(url_for('product_detail', product_id=product_id))
+
+    # GET – render the checkout form (template already exists)
+    return render_template('checkout.html', product=product)
 
 @app.route('/api/predict_label', methods=['POST'])
 def api_predict():
@@ -89,7 +109,11 @@ def add_review(product_id):
         flash('Please fill in all fields.', 'error')
         return redirect(url_for('product_detail', product_id=product_id))
 
-    ok = append_review(product_id, author, rating, title, text)
+    # A reviewer is a "Verified Buyer" if they went through the checkout flow
+    # for this product during the current session.
+    is_buyer = product_id in session.get('purchased', [])
+
+    ok = append_review(product_id, author, rating, title, text, is_buyer=is_buyer)
 
     if ok:
         clear_products_cache()
