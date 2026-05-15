@@ -92,7 +92,6 @@ def add_review(product_id):
     ok = append_review(product_id, author, rating, title, text)
     if ok:
         save_new_review(product_id, title, text, rating, final_label)
-
         clear_products_cache()
         flash('Your review has been submitted. Thank you!', 'success')
     else:
