@@ -1,10 +1,15 @@
 import csv
-import datetime
+from datetime import datetime
 from pathlib import Path
+
+from app.logic.products import get_product_by_id
+from app.preprocessed import preprocess_text
+from app.logic.ml_model import save_new_review
 
 _BASE_DIR = Path(__file__).resolve().parent.parent.parent
 _RAW_CSV  = _BASE_DIR / "data" / "cosmetics_beauty_products_reviews.csv"
 _PROC_CSV = _BASE_DIR / "data" / "processed.csv"
+_FEEDBACK_CSV = _BASE_DIR / "data" / "test_feedback.csv"
 
 # Column order must match the CSV headers exactly
 _COLUMNS = [
@@ -16,28 +21,49 @@ _COLUMNS = [
 
 
 def get_product_reviews(product_id):
-    reviews = []
+    all_reviews = []
     pid = str(product_id)
 
-    with open(_RAW_CSV, encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if row['product_id'] == pid:
-                try:
-                    rating = float(row['review_rating'])
-                except (ValueError, TypeError):
-                    rating = 0.0
-                reviews.append({
-                    'review_id': row['review_id'],
-                    'title':     row['review_title'],
-                    'text':      row['review_text'],
-                    'author':    row['author'],
-                    'date':      row['review_date'].split(' ')[0],
-                    'rating':    rating,
-                    'is_buyer':  row['is_a_buyer'].strip().lower() == 'true',
-                })
+    if _PROC_CSV.exists():
+        with open(_PROC_CSV, encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['product_id'] == pid:
+                    try:
+                        rating = float(row['review_rating'])
+                    except (ValueError, TypeError):
+                        rating = 0.0
+                    all_reviews.append({
+                        'review_id': row['review_id'],
+                        'title':     row['review_title'],
+                        'text':      row['review_text'],
+                        'author':    row['author'],
+                        'date':      row['review_date'].split(' ')[0],
+                        'rating':    rating,
+                        'is_buyer':  row['is_a_buyer'].strip().lower() == 'true',
+                    })
 
-    return reviews
+    feedback_path = _BASE_DIR / "data" / "test_feedback.csv"
+    if feedback_path.exists():
+        with open(feedback_path, encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['product_id'] == pid:
+                    try:
+                        rating = float(row['review_rating'])
+                    except (ValueError, TypeError):
+                        rating = 0.0
+                    all_reviews.append({
+                        'review_id': row['review_id'],
+                        'title':     row['review_title'],
+                        'text':      row['review_text'],
+                        'author':    row['author'],
+                        'date':      row['review_date'].split(' ')[0],
+                        'rating':    rating,
+                        'is_buyer':  row['is_a_buyer'].strip().lower() == 'true',
+                    })
+
+    return all_reviews
 
 
 def _generate_review_id():
@@ -77,42 +103,28 @@ def _insert_row_grouped(path, row):
 #   - set raw_row['is_a_buyer']       = 'TRUE' if is_buyer else 'FALSE'
 #   - set processed_row['is_a_buyer'] = 'True' if is_buyer else 'False'
 def append_review(product_id, author, rating, title, text):
-    from app.logic.products import get_product_by_id
-    from app.preprocessed import preprocess_text
 
+    from app.logic.products import get_product_by_id
+    from app.logic.ml_model import save_new_review
+    from datetime import datetime
+    
     product = get_product_by_id(str(product_id))
+
     if not product:
         return False
 
-    review_id   = _generate_review_id()
-    review_date = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+    final_label = 0
+    current_date = datetime.now().strftime('%d/%m/%Y %H:%M')
 
     # Row written to the raw CSV (original text, int rating, TRUE/FALSE)
-    raw_row = {
-        'product_id':          str(product_id),
-        'brand_name':          product['brand'],
-        'review_id':           review_id,
-        'review_title':        title,
-        'review_text':         text,
-        'author':              author,
-        'review_date':         review_date,
-        'review_rating':       int(rating),
-        'is_a_buyer':          'TRUE',
-        'product_title':       product['name'],
-        'price':               product['price'],
-        'avg_product_rating':  product['rating'],
-        'product_rating_count': product['rating_count'],
-        'product_tags':        product['tags'],
-        'product_url':         product['url'],
-    }
-
-    # Row written to processed CSV (preprocessed text, float rating, True/False)
-    processed_row = dict(raw_row)
-    processed_row['review_text']   = preprocess_text(text)
-    processed_row['review_rating'] = float(rating)
-    processed_row['is_a_buyer']    = 'True'
-
-    _insert_row_grouped(_RAW_CSV,  raw_row)
-    _insert_row_grouped(_PROC_CSV, processed_row)
+    save_new_review(
+        product_info=product, 
+        review_title=title,
+        review_text=text,
+        author=author,
+        rating=int(rating),
+        final_label=final_label,
+        review_date=current_date
+    )
 
     return True
