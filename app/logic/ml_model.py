@@ -165,8 +165,7 @@ def predict(review_text, rating=3):
     # 3. Get Probability from Model 3 
     pred_rating = rating_model.predict_proba([[rating]])[0][1]
 
-    # In debug để kiểm tra model nào đang gây ra lỗi Positive
-    print(f"\n--- DEBUG SCORES ---")
+    # Print debug to check which model predicted wrong
     print(f"LR (Keyword): {pred_lr:.4f}")
     print(f"RF (Semantic): {pred_rf:.4f}")
     print(f"GNB (Rating): {pred_rating:.4f}")
