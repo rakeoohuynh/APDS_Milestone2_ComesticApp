@@ -90,17 +90,14 @@ def add_review(product_id):
         return redirect(url_for('product_detail', product_id=product_id))
 
     ok = append_review(product_id, author, rating, title, text)
+
     if ok:
-        save_new_review(product_id, title, text, rating, final_label)
         clear_products_cache()
         flash('Your review has been submitted. Thank you!', 'success')
     else:
         flash('Could not save your review. Product not found.', 'error')
 
     return redirect(url_for('product_detail', product_id=product_id))
-
-    print("FORM DATA:", request.form)
-    print("RATING RECEIVED:", request.form.get('rating'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
