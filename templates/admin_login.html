@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login — Beauty Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .login-wrap {
+            max-width: 380px;
+            margin: 80px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.10);
+            padding: 40px 36px;
+        }
+        .login-wrap h1 {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+            color: #1a1a2e;
+        }
+        .login-wrap p {
+            color: #888;
+            font-size: .9rem;
+            margin-bottom: 28px;
+        }
+        .login-wrap label {
+            display: block;
+            font-size: .85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #444;
+        }
+        .login-wrap input[type="password"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: .95rem;
+            box-sizing: border-box;
+            transition: border-color .2s;
+        }
+        .login-wrap input[type="password"]:focus {
+            outline: none;
+            border-color: #e91e8c;
+        }
+        .login-wrap .btn-login {
+            margin-top: 20px;
+            width: 100%;
+            padding: 11px;
+            background: #e91e8c;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .login-wrap .btn-login:hover { background: #c0176e; }
+        .flash--error {
+            background: #fdecea;
+            color: #b71c1c;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: .88rem;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            font-size: .85rem;
+            color: #888;
+            text-decoration: none;
+        }
+        .back-link:hover { color: #e91e8c; }
+    </style>
+</head>
+<body>
+<header class="hero hero--slim">
+    <div class="hero-inner">
+        <a href="/" class="logo">Beauty<span>Shop</span></a>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="login-wrap">
+        <h1>&#128274; Admin Access</h1>
+        <p>Enter the admin password to access the dashboard.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="flash--{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" autofocus required>
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+
+        <a class="back-link" href="/">&#8592; Back to shop</a>
+    </div>
+</main>
+
+<footer class="footer">
+    <p>Beauty Shop &copy; 2025 &mdash; Powered by Nykaa data</p>
+</footer>
+</body>
+</html>

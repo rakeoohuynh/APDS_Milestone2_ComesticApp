@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Beauty Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* ── Layout ─────────────────────────────────── */
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .admin-header h1 {
+            font-size: 1.6rem;
+            color: #1a1a2e;
+            margin: 0;
+        }
+        .admin-header .logout-btn {
+            font-size: .85rem;
+            color: #888;
+            text-decoration: none;
+            border: 1.5px solid #ddd;
+            padding: 6px 14px;
+            border-radius: 20px;
+            transition: color .2s, border-color .2s;
+        }
+        .admin-header .logout-btn:hover { color: #e91e8c; border-color: #e91e8c; }
+
+        /* ── Stat cards ──────────────────────────────── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.07);
+            padding: 24px 20px;
+            text-align: center;
+        }
+        .stat-card .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #e91e8c;
+            line-height: 1;
+        }
+        .stat-card .stat-label {
+            margin-top: 8px;
+            font-size: .85rem;
+            color: #888;
+            font-weight: 500;
+        }
+        .stat-card.buy   .stat-value { color: #27ae60; }
+        .stat-card.nobuy .stat-value { color: #e74c3c; }
+
+        /* ── Distribution bar ────────────────────────── */
+        .distrib-section {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.07);
+            padding: 24px 28px;
+            margin-bottom: 32px;
+        }
+        .distrib-section h2 {
+            font-size: 1.05rem;
+            margin: 0 0 16px;
+            color: #1a1a2e;
+        }
+        .distrib-bar-wrap {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 28px;
+        }
+        .distrib-bar-buy {
+            background: #27ae60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: .8rem;
+            font-weight: 600;
+            transition: width .6s ease;
+        }
+        .distrib-bar-nobuy {
+            background: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: .8rem;
+            font-weight: 600;
+            flex: 1;
+        }
+        .distrib-legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 12px;
+            font-size: .85rem;
+            color: #555;
+        }
+        .distrib-legend span { display: flex; align-items: center; gap: 6px; }
+        .legend-dot {
+            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+        }
+        .legend-dot.buy   { background: #27ae60; }
+        .legend-dot.nobuy { background: #e74c3c; }
+
+        /* ── Tables ──────────────────────────────────── */
+        .section-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.07);
+            padding: 24px 28px;
+            margin-bottom: 32px;
+        }
+        .section-card h2 {
+            font-size: 1.05rem;
+            margin: 0 0 18px;
+            color: #1a1a2e;
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .88rem;
+        }
+        .admin-table th {
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #aaa;
+            font-weight: 600;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        .admin-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f8f8f8;
+            color: #333;
+            vertical-align: middle;
+        }
+        .admin-table tr:last-child td { border-bottom: none; }
+        .admin-table tr:hover td { background: #fafafa; }
+
+        .badge-buy {
+            background: #e8f8f0;
+            color: #27ae60;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: .78rem;
+            font-weight: 600;
+        }
+        .badge-nobuy {
+            background: #fdecea;
+            color: #e74c3c;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: .78rem;
+            font-weight: 600;
+        }
+        .stars-small { color: #f5a623; font-size: .85rem; letter-spacing: 1px; }
+        .review-text-trunc {
+            max-width: 300px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            color: #666;
+            font-size: .84rem;
+        }
+        .empty-note {
+            color: #aaa;
+            font-size: .9rem;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .product-link {
+            color: #e91e8c;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .product-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<header class="hero hero--slim">
+    <div class="hero-inner">
+        <a href="/" class="logo">Beauty<span>Shop</span></a>
+    </div>
+</header>
+
+<main class="main-content">
+
+    <div class="admin-header">
+        <h1>&#128202; Admin Dashboard</h1>
+        <a href="/admin/logout" class="logout-btn">&#128274; Logout</a>
+    </div>
+
+    <!-- ── Stat cards ────────────────────────── -->
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total }}</div>
+            <div class="stat-label">Total Reviews</div>
+        </div>
+        <div class="stat-card buy">
+            <div class="stat-value">{{ buy_count }}</div>
+            <div class="stat-label">Buy Reviews</div>
+        </div>
+        <div class="stat-card nobuy">
+            <div class="stat-value">{{ not_buy_count }}</div>
+            <div class="stat-label">Not Buy Reviews</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ buy_pct }}%</div>
+            <div class="stat-label">Positive Rate</div>
+        </div>
+    </div>
+
+    <!-- ── Distribution bar ──────────────────── -->
+    <div class="distrib-section">
+        <h2>Buy / Not Buy Distribution</h2>
+        <div class="distrib-bar-wrap">
+            <div class="distrib-bar-buy" style="width: {{ buy_pct }}%;">
+                {% if buy_pct > 10 %}{{ buy_pct }}%{% endif %}
+            </div>
+            <div class="distrib-bar-nobuy">
+                {% if (100 - buy_pct) > 10 %}{{ 100 - buy_pct }}%{% endif %}
+            </div>
+        </div>
+        <div class="distrib-legend">
+            <span><span class="legend-dot buy"></span> Buy ({{ buy_count }})</span>
+            <span><span class="legend-dot nobuy"></span> Not Buy ({{ not_buy_count }})</span>
+        </div>
+    </div>
+
+    <!-- ── Top products ───────────────────────── -->
+    <div class="section-card">
+        <h2>&#127942; Top Rated Products</h2>
+        {% if top_products %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>Avg Rating</th>
+                    <th>Reviews</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in top_products %}
+                <tr>
+                    <td style="color:#ccc; font-weight:700;">{{ loop.index }}</td>
+                    <td>{{ p.title if p.title else p.id }}</td>
+                    <td>
+                        <span class="stars-small">
+                            {% for i in range(p.avg_rating | int) %}&#9733;{% endfor %}
+                            {% for i in range(5 - (p.avg_rating | int)) %}&#9734;{% endfor %}
+                        </span>
+                        <strong>{{ p.avg_rating }}</strong>
+                    </td>
+                    <td>{{ p.count }}</td>
+                    <td><a class="product-link" href="/product/{{ p.id }}">View &#8594;</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty-note">Not enough data yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- ── Recent reviews ─────────────────────── -->
+    <div class="section-card">
+        <h2>&#128221; Recent User-Submitted Reviews</h2>
+        {% if recent_reviews %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Author</th>
+                    <th>Product</th>
+                    <th>Rating</th>
+                    <th>Label</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in recent_reviews %}
+                <tr>
+                    <td style="white-space:nowrap; color:#aaa;">{{ r.date if r.date else '—' }}</td>
+                    <td>{{ r.author }}</td>
+                    <td>
+                        <a class="product-link" href="/product/{{ r.product_id }}">
+                            {{ r.product_title if r.product_title else r.product_id }}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="stars-small">
+                            {% for i in range(r.rating | int) %}&#9733;{% endfor %}
+                            {% for i in range(5 - (r.rating | int)) %}&#9734;{% endfor %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if r.is_buyer %}
+                            <span class="badge-buy">Buy</span>
+                        {% else %}
+                            <span class="badge-nobuy">Not Buy</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="review-text-trunc" title="{{ r.title }}">{{ r.title }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty-note">No user-submitted reviews yet.</p>
+        {% endif %}
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Beauty Shop &copy; 2025 &mdash; Admin Panel</p>
+</footer>
+
+</body>
+</html>
