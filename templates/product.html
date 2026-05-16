@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,14 +8,14 @@
 </head>
 <body>
 
-<!-- â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- Header -->
 <header class="hero hero--slim">
     <div class="hero-inner">
         <a href="/" class="logo">Beauty<span>Shop</span></a>
     </div>
 </header>
 
-<!-- â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- Main  -->
 <main class="main-content">
 
     <!-- Breadcrumb -->
@@ -36,7 +36,7 @@
         {% endif %}
     {% endwith %}
 
-    <!-- â”€â”€ Product detail â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!--  Product detail  -->
     <section class="detail-section">
         <div class="detail-img-wrap">
             <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
@@ -77,15 +77,15 @@
         </div>
     </section>
 
-    <!-- â”€â”€ Reviews â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- Reviews -->
     <section class="reviews-section">
         <div class="reviews-header">
             <h2>Customer Reviews <span class="reviews-count">({{ reviews|length }})</span></h2>
             <div class="reviews-header-actions">
                 <select class="review-filter-select" onchange="filterReviews(this.value)">
                     <option value="all">All Reviews</option>
-                    <option value="good">High rating</option>
-                    <option value="bad">Low rating</option>
+                    <option value="high">High rating</option>
+                    <option value="low">Low rating</option>
                 </select>
                 <button class="btn-add-review" onclick="toggleReviewForm()">&#43; Add Review</button>
             </div>
@@ -147,7 +147,7 @@
         {% if reviews %}
         <div class="review-list">
             {% for r in reviews %}
-            <div class="review-card" data-label="{{ 'good' if r.ml_label == 1 else 'bad' }}">
+            <div class="review-card" data-label="{{ 'good' if r.ml_label == 1 else 'bad' }}" data-rating="{{ r.rating }}">
                 <div class="review-meta">
                     <div class="review-stars">
                         {% set rfull = r.rating | int %}
@@ -173,7 +173,7 @@
         <div id="reviewPagination" class="review-pagination"></div>
     </section>
 
-    <!-- â”€â”€ Recommendations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- Recommendations -->
     {% if recommendations %}
     <section class="reco-section">
         <h2>You May Also Like</h2>
@@ -205,7 +205,7 @@
 
 </main>
 
-<!-- â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- Footer -->
 <footer class="footer">
     <p>Beauty Shop &copy; 2025 &mdash; Powered by Nykaa data</p>
 </footer>
@@ -215,10 +215,15 @@ const PER_PAGE = 5;
 let currentPage = 1;
 
 function getFilteredCards() {
-    const label = document.querySelector('.review-filter-select').value;
-    return Array.from(document.querySelectorAll('.review-card')).filter(
-        card => label === 'all' || card.dataset.label === label
-    );
+    const filterValue = document.querySelector('.review-filter-select').value;
+    let cards = Array.from(document.querySelectorAll('.review-card'));
+
+    if (filterValue === 'high') {
+        cards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
+    } else if (filterValue === 'low') {
+        cards.sort((a, b) => parseFloat(a.dataset.rating) - parseFloat(b.dataset.rating));
+    }
+    return cards;
 }
 
 function renderPage() {
@@ -288,7 +293,7 @@ function toggleReviewForm() {
 
         form.style.display = 'block';
 
-        btn.textContent = 'âœ• Close';
+        btn.textContent = 'Close';
 
         form.scrollIntoView({
             behavior: 'smooth',
@@ -392,8 +397,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 if (data.label === 'Buy') {
 
-                    aiLabelText.textContent =
-                        `âœ“ ${pct}% Buy â€” This looks like a Buyer Review`;
+                    aiLabelText.textContent = `\u2713 ${pct}% Buy \u2014 This looks like a Buyer Review`;
 
                     aiLabelText.style.color = '#27ae60';
 
@@ -401,8 +405,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 } else {
 
-                    aiLabelText.textContent =
-                        `âœ— ${pct}% Buy â€” This looks like a Not Buy Review`;
+                    aiLabelText.textContent = `\u2717 ${pct}% Buy \u2014 This looks like a Not Buy Review`;
 
                     aiLabelText.style.color = '#e74c3c';
 
